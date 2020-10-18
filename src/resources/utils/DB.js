@@ -5,11 +5,18 @@ const db = {
 };
 
 const getAllElements = tableName => {
+  if (!db[tableName].length) {
+    throw new Error(`There are no elements in ${tableName}`);
+  }
   return db[tableName];
 };
 
 const getElementById = (tableName, id) => {
-  return db[tableName].find(el => el.id === id);
+  const entity = db[tableName].find(el => el.id === id);
+  if (!entity) {
+    throw new Error(`No ${tableName} with id "${id}"`);
+  }
+  return entity;
 };
 
 const createElement = (tableName, el) => {
@@ -24,9 +31,10 @@ const updateElement = (tableName, id, el) => {
 
 const removeElementById = (tableName, id) => {
   const newTable = db[tableName].filter(el => el.id !== id);
-  const flag = newTable.length === db[tableName].length;
+  if (newTable.length === db[tableName].length) {
+    throw new Error(`No ${tableName} with this parametrs`);
+  }
   db[tableName] = db[tableName].filter(el => el.id !== id);
-  return !flag;
 };
 
 module.exports = {

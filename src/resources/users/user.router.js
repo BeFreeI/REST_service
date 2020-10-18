@@ -5,8 +5,12 @@ const usersService = require('./user.service');
 router
   .route('/')
   .get(async (req, res) => {
-    const users = await usersService.getAll();
-    res.json(users.map(User.toResponse));
+    try {
+      const users = await usersService.getAll();
+      res.json(users.map(User.toResponse));
+    } catch {
+      res.json([]);
+    }
   })
   .post(async (req, res) => {
     const user = await usersService.create(new User(req.body));
@@ -29,11 +33,11 @@ router
     res.json(User.toResponse(user));
   })
   .delete(async (req, res) => {
-    const user = await usersService.remove(req.params.id);
-    if (!user) {
-      res.send(null);
-    } else {
-      res.body = User.toResponse(user);
+    try {
+      await usersService.remove(req.params.id);
+      res.status(204);
+    } catch {
+      res.status(404);
     }
     res.end();
   });

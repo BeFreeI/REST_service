@@ -5,8 +5,13 @@ const boardsService = require('./board.service');
 router
   .route('/')
   .get(async (req, res, next) => {
-    const boards = boardsService.getAll();
-    res.json(boards);
+    try {
+      const boards = await boardsService.getAll();
+      res.status(200).json(boards.map(Board.toResponse));
+    } catch {
+      res.status(400);
+    }
+    res.end();
     next();
   })
   .post(async (req, res, next) => {
@@ -18,8 +23,14 @@ router
 router
   .route('/:boardId')
   .get(async (req, res, next) => {
-    const board = boardsService.get(req.params.boardId);
-    res.json(Board.toResponse(board));
+    try {
+      res
+        .status(200)
+        .json(Board.toResponse(await boardsService.get(req.params.boardId)));
+    } catch {
+      res.status(404);
+    }
+    res.end();
     next();
   })
   .put(async (req, res, next) => {
@@ -33,9 +44,12 @@ router
     res.json(Board.toResponse(board));
     next();
   })
-  .delete(async (req, res, next) => {
-    if (!boardsService.remove(req.params.boardId)) {
-      res.status(404).end();
+  .delete((req, res, next) => {
+    try {
+      boardsService.remove(req.params.boardId);
+      res.status(204);
+    } catch {
+      res.status(404);
     }
     res.end();
     next();
